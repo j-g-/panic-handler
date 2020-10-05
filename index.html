@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANIC Report</title>
+    <base target="-top">
+    <?!=   HtmlService.createHtmlOutputFromFile("panic-handler.css.html").getContent() ?>
+
+</head>
+<body>
+    <? let currentAgentRol = getCurrentAgentRol(); ?>
+    <? if(currentAgentRol === "mentor") { ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("mentor.view.html").getContent() ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("quotes.json.html").getContent() ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("panic-handler.js.html").getContent() ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("mentor.js.html").getContent() ?>
+        
+    <? } else if (currentAgentRol === "trainee") { ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("trainee.view.html").getContent() ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("quotes.json.html").getContent() ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("panic-handler.js.html").getContent() ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("trainee.js.html").getContent() ?>
+    <? } else { ?>
+        <?!=   HtmlService.createHtmlOutputFromFile("external-visitor.html").getContent() ?>
+    <? }?>
+</body>
+</html>

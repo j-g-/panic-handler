@@ -1,0 +1,206 @@
+<style>
+    html,
+    input,
+    textarea {
+        font-family: Arial;
+    }
+
+    body {
+        margin: 0px;
+        padding: 0px;
+        border: 0px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px;
+        grid-row: span 2;
+    }
+
+    form>label {
+        display: flex;
+        flex-direction: row;
+    }
+
+    label>span {
+        width: 10em;
+        font-size: small;
+    }
+
+    textarea {
+        width: 100%;
+        resize: none;
+        flex-grow: 2;
+    }
+
+    input {
+        width: 100%;
+    }
+
+    button.circle {
+        height: 72px;
+        width: 72px;
+        margin: 4px;
+        border: 2px solid black;
+        border-radius: 36px;
+        font-size: large;
+        font-weight: bold;
+        padding: 0px;
+        color: white;
+
+    }
+
+    div.buttons {
+        display: flex;
+        flex-direction: row;
+        place-content: flex-end;
+    }
+
+    button#panic {
+        background: red;
+    }
+
+    button#calm {
+        background: green;
+    }
+
+    #panic-quote {
+        display: flex;
+        flex-direction: column;
+        padding: 4px;
+        grid-column: span 2;
+    }
+
+    #quote-text {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-size: medium;
+        font-style: italic;
+        flex-grow: 2;
+    }
+
+    #quote-author {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-size: small;
+        text-align: left;
+    }
+
+    div#status {
+        display: grid;
+        grid-template-rows: 48px auto 48px auto;
+        flex-grow: 2;
+        margin: 8px;
+        overflow: hidden;
+    }
+    div.questions-box{
+        display: flex;
+        flex-direction: column;
+        overflow-y: scroll;
+        padding: 4px;
+        border: 1px solid black;
+    }
+    .questions-info-column{
+        display: grid;
+        gap: 4px;
+        grid-template-rows: 35px auto;
+        overflow: hidden;
+    }
+    .questions-column-header {
+        padding: 3px;
+        border: 1px solid black;
+        text-align: center;
+        font-size: 16px;
+        border-radius: 4px;
+    }
+
+    h3 {
+        padding:0px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .question {
+        border: 1px solid black;
+        margin: 4px;
+        padding: 4px;
+        border-radius: 4px;
+        font-size: smaller;
+    }
+
+    .question-header {
+        display: flex;
+        padding: 4px;
+        height: 24px;
+    }
+    .spacer{
+        flex-grow: 2;
+    }
+
+    .question-header > button {
+        display: block;
+        margin: 0px;
+        padding: 0px;
+        border: 1px solid black;
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        font-size: 20px;
+        background-color: white;
+    }
+
+    .question-header > button:hover {
+        background-color: darkgray;
+    }
+    .question-header > button:active {
+        background-color: gray;
+    }
+
+
+    .question > div > span {
+        font-weight: bold;
+    }
+
+    .right-pane {
+        display: flex;
+        flex-direction: column;
+        overflow-y: hidden;
+    }
+
+    .kanban-column-title {
+        font-size: 16px;
+        text-align: center;
+        border: 1px solid black;
+        padding: 3px;
+        border-radius: 4px;
+        height: 24px;
+    }
+    .kanban-column {
+        display: grid;
+        grid-template-rows: 36px auto;
+        overflow-y: hidden;
+    }
+    .kanban-column-content {
+        display:flex;
+        flex-direction: column;
+        overflow-y: scroll;
+    }
+
+    div#trainee-content {
+        width: 100%;
+        display: grid;
+        gap: 4px;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: auto 64px;
+        height: 100vh;
+    }
+
+    div#mentor-content {
+        width: calc(100% - 8px);
+        display: grid;
+        margin: 4px;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 8px;
+        height: calc(100vh - 8px);
+    }
+</style>

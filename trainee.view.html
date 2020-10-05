@@ -1,0 +1,27 @@
+<div id="trainee-content">
+    <form action="submit" id="question-info">
+        <div id="user-info"></div>
+        <label for="submitter-id"><span>Your ID</span><input name="submitterId" type="text" id="submitter-id"></label>
+        <label for="account-id"><span>NCID</span><input name="accountId" type="text" id="account-id"></label>
+        <label for="requester"><span>Requester</span><input name="requester" type="text" id="requester"></label>
+        <label for="address"><span>Address ID</span><input name="addressId" type="text" id="address"></label>
+        <input style="display:none" name="group" id="group" type="text">
+        <textarea name="requestInfo" id="request-info" placeholder="Issue information..."></textarea>
+        <div class="buttons">
+            <button class="circle" id="calm">CALM</button>
+            <button class="circle" id="panic">PANIC</button>
+        </div>
+    </form>
+    <div class="questions-info-column">
+        <div class="questions-column-header">Unresolved</div>
+        <div class="questions-box" id="unresolved-questions"></div>
+    </div>
+    <div class="questions-info-column">
+        <div class="questions-column-header">Resolved</div>
+        <div class="questions-box" id="resolved-questions"></div>
+    </div>
+    <div id="panic-quote">
+        <div id="quote-text"></div>
+        <div id="quote-author"></div>
+    </div>
+</div>

@@ -1,0 +1,89 @@
+<script>
+    function updateQuestionColumns(results) {
+        if(!results){
+            return;
+        }
+        let questions = results
+            .map(result => questionArrayToObject(result))
+
+        let myUnresolved = [];
+        let unassignedUnresolved = [];
+        let inProgress = [];
+        let resolved = [];
+
+        questions.forEach(q => {
+            if (q.questionStatus === 'Resolved') {
+                resolved.push(q);
+            } else if(q.assignedTo === 'Unassigned') {
+                unassignedUnresolved.push(q);
+            } else {
+                if(q.assignedTo === currentUser.id) {
+                    myUnresolved.push(q);
+                }
+                inProgress.push(q);
+            }
+        })
+        document.querySelector("div#my-unresolved > .kanban-column-title").innerText = `My Unresolved (${myUnresolved.length})`;
+        document.querySelector("div#my-unresolved > .kanban-column-content").innerHTML = 
+            myUnresolved.map( question => questionToHTML(question)).join("");
+
+        document.querySelector("div#unresolved > .kanban-column-title").innerText = `Unresolved (${unassignedUnresolved.length})`;
+        document.querySelector("div#unresolved > .kanban-column-content").innerHTML = 
+            unassignedUnresolved.map( question => questionToHTML(question)).join("");
+
+        document.querySelector("div#in-progress > .kanban-column-title").innerText = `In Progress (${inProgress.length})`;
+        document.querySelector("div#in-progress > .kanban-column-content").innerHTML = 
+            inProgress.map( question => questionToHTML(question)).join("");
+
+        document.querySelector("div#resolved > .kanban-column-title").innerText = `Resolved (${resolved.length})`;
+        document.querySelector("div#resolved > .kanban-column-content").innerHTML = 
+            resolved.map( question => questionToHTML(question)).join("");
+
+        let textareas = Array.from(document.querySelectorAll('textarea.resolution-info'));
+        textareas.forEach(t => {
+            t.addEventListener('focus', stopRecevingUpdates)
+            t.addEventListener('blur', startRecevingUpdates)
+        });
+
+        let resolveButtons = Array.from(document.querySelectorAll('.resolve-btn'));
+        resolveButtons.forEach(rb => rb.addEventListener('click', resolveQuestionHandler));
+
+        let assignButtons = Array.from(document.querySelectorAll('.assign-btn'));
+        assignButtons .forEach(rb => rb.addEventListener('click', assignQuestionHandler));
+    }
+
+    function updateInfo(){
+        if (document.hasFocus() || firstLoad) {
+            updateCount++;
+            google.script.run
+                .withSuccessHandler(updateQuestionColumns)
+                .withFailureHandler(showError)
+                .getAllTodayQuestions();
+            if (firstLoad) {
+                console.log("Loaded for the first time")
+                firstLoad = false;
+            }
+        }
+    }
+
+    function assignQuestionHandler(event){
+        const targetId = event.target.id;
+        const [action, qId] = targetId.split("-");
+        let assignToValues = {
+            qId : qId,
+            assignee : currentUser.id
+        };
+        google.script.run
+            .withSuccessHandler(updateInfo)
+            .assignQuestion(assignToValues);
+    }
+
+    // Onload callback
+    this.onload = function () {
+        loadParticipants();
+        updateInfo()
+    } 
+    this.onfocus = updateInfo;
+    // Start updates
+    intervalUpdaterId = setInterval(updateInfo, 10000);
+</script>

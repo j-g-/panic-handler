@@ -1,0 +1,149 @@
+<script>
+    // Loads Unsbmitted question from localStorage
+    function loadUnsubmitted(){
+        let jsonData = localStorage.getItem("unsubmitted-question")
+        if (jsonData) {
+            let unsubmittedQuesion = JSON.parse(jsonData);
+            unsubmittedQuesion.forEach(arr => {
+                document.querySelector(arr[0]).value = arr[1];
+            });
+        }
+    }
+
+    // Stores Unsbmitted question from localStorage
+    function storeUnsubmitted(){
+        let unsubmittedQuestion = [];
+        unsubmittedQuestion.push(
+            ["#submitter-id", document.querySelector("#submitter-id").value]);
+        unsubmittedQuestion.push(
+            ["#account-id", document.querySelector("#account-id").value]);
+        unsubmittedQuestion.push(
+            ["#requester", document.querySelector("#requester").value]);
+        unsubmittedQuestion.push(
+            ["#address", document.querySelector("#address").value]);
+        unsubmittedQuestion.push(
+            ["#request-info", document.querySelector("#request-info").value]);
+        
+        localStorage.setItem("unsubmitted-question", JSON.stringify(unsubmittedQuestion));
+    }
+    document.querySelector("#question-info").addEventListener("change", storeUnsubmitted);
+
+    // Resets form after Submission
+    function resetForm(){
+        document.querySelector("#question-info").reset();
+        setCurrentId();
+        storeUnsubmitted();
+    }
+
+    // Sets the current user id  and group for next submitssion
+    function setCurrentId(){
+        if(currentUser){
+            submitterInputField = 
+                document.querySelector("#submitter-id");
+            submitterInputField.value = currentUser.id;
+            submitterInputField.readOnly = true;
+            groupInputField = 
+                document.querySelector("#group");
+            groupInputField.value = currentUser.group;
+        }
+    }
+
+    function isFormIsFilled(){
+        let filled = false;
+        const form = document.querySelector('#question-info');
+        let inputs = Array.from(form.querySelectorAll('input'));
+        for (let index = 0; index < inputs.length; index++) {
+            const element = inputs[index];
+            filled = element.value.trim().length > 0;
+            if (!filled) break;
+        }
+        if(!filled) {return filled;}
+        filled = form.querySelector('textarea').value.trim().length > 0;
+        return filled;
+    }
+
+    // Submits a question to the Data spreadsheet
+    function submitPanic(e) {
+        e.preventDefault();
+        const questionInfoForm = document.querySelector("#question-info");
+        
+        if(isFormIsFilled()) {
+            google.script.run
+                .withSuccessHandler(updateInfo)
+                .withFailureHandler(showError)
+                .submitQuestion(questionInfoForm);
+            updateQuote();
+            resetForm();
+        } else {
+            alert("Please, fill all the values before submitting. Use N/A if info is not available.");
+        }
+    }
+    document.querySelector("button#panic").addEventListener("click", submitPanic);
+    document.querySelector("button#calm").addEventListener("click", (e) => {
+        e.preventDefault();
+        updateQuote();
+    });
+
+
+    // Updates the questions displayed
+    function updateQuestionsDisplayed(results) {
+        if(!results){
+            return;
+        }
+        let questions = results
+            .map(result => questionArrayToObject(result))
+        let unresolved = questions.filter(q => q.questionStatus !== 'Resolved');
+        let resolved = questions.filter(q => q.questionStatus === 'Resolved');
+        document.querySelector("#unresolved-questions").innerHTML = 
+            unresolved.map( question => questionToHTML(question)).join("");
+        let textareas = Array.from(
+            document.querySelector('#unresolved-questions')
+                .querySelectorAll('textarea'));
+        
+        textareas.forEach(t => {
+            t.addEventListener('focus', stopRecevingUpdates)
+            t.addEventListener('blur', startRecevingUpdates)
+        });
+
+        let resolveButtons = Array.from(document.querySelectorAll('.resolve-btn'));
+        resolveButtons.forEach(rb => rb.addEventListener('click', resolveQuestionHandler));
+
+        //document.querySelector("#unresolved-questions").addEventListener('click', questionUpdateHandler);
+
+        document.querySelector("#resolved-questions").innerHTML = 
+            resolved.map( question => questionToHTML(question)).join("");
+        
+
+    }
+
+    // Call back function that will be called every 10 s 
+    // to update Info
+    function updateInfo() {
+        if (document.hasFocus() || firstLoad) {
+            updateCount++;
+            google.script.run
+                .withSuccessHandler(updateQuestionsDisplayed)
+                .withFailureHandler(showError)
+                .getQuestionsByAgentId(document.querySelector("#submitter-id").value);
+            if (firstLoad) {
+                console.log("Loaded for the first time")
+                firstLoad = false;
+            }
+        }
+    }
+
+
+    // Onload callback
+    this.onload = function () {
+        loadParticipants();
+        loadUnsubmitted();
+        setTimeout(setCurrentId, 3000);
+        updateInfo();
+        updateQuote();
+    } 
+
+    this.onfocus = updateInfo;
+
+    // Start updates
+    intervalUpdaterId = setInterval(updateInfo, 10000);
+</script>

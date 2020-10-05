@@ -1,0 +1,142 @@
+<script>
+    const panicQuotesJSON = quetQuotesJSON();
+    let panicQuotes = JSON.parse(panicQuotesJSON.toString());
+    let firstLoad = true;
+    let participants = [];
+    let currentUser = undefined; 
+    let intervalUpdatedID = 0;
+
+    function loadParticipants(){
+        
+        google.script.run.withSuccessHandler(function(results) {
+
+            console.log("Results:");
+            console.log(results)
+            participants = results.participants;
+            currentUserEmail = results.currentUserEmail;
+            currentUser = participants.find(p => p.email === currentUserEmail);
+        }).getParticipants();
+    }
+
+
+    function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    }
+    
+
+    function updateQuote() {
+        if (panicQuotes.length === 0) {
+            console.log("Resetting quotes");
+            panicQuotes = JSON.parse(panicQuotesJSON);
+        }
+        let index = getRandomInt(panicQuotes.length)
+        let quote = panicQuotes[index];
+        document.querySelector("#quote-text").innerText = `"${quote[0].trim()}"`;
+        document.querySelector("#quote-author").innerText = `- ${quote[1].trim()}`;
+        panicQuotes.splice(index, 1);
+    }
+
+
+
+    let updateCount = 0;
+
+    function questionArrayToObject(questionArray) {
+        return {
+            qId: questionArray[0],
+            agent: questionArray[1],
+            requester: questionArray[2],
+            accountId: questionArray[3],
+            addressId: questionArray[4],
+            questionText: questionArray[5],
+            questionStatus: questionArray[6],
+            assignedTo: questionArray[7],
+            resolution: questionArray[8],
+            submittedOn: questionArray[9],
+            resolvedOn: questionArray[10],
+            group: questionArray[11]
+        }
+    }
+
+    function questionToHTML(question) {
+        let submitter = participants.find(p => p.id === question.agent)  
+        let submitteName = (submitter) ? submitter.name : "Unknown";
+
+        let assignee = (question.assignedTo !== 'Unassigned')?
+             participants.find(p => p.id === question.assignedTo)  : null;
+        let asgineeName = (assignee) ? assignee.name : "Unknown";
+
+        html = `<div class="question" id="question-${question.qId}">` +
+            `<div class="question-header" style='margin-bottom:4px;border-bottom: 8px solid ${question.group}'>`+
+                `<div>QID:</div>`+
+                `<div>${question.qId}</div>`+
+                `<div class="spacer"></div>`;
+        html +=    (currentUser.rol === "mentor" && question.questionStatus !== 'Resolved') ? 
+                   `<button title="Assign this to myself" id="assign-${question.qId}" class="assign-btn">&#9995;</button>`: '' ;
+        html +=    (question.questionStatus !== 'Resolved') ?
+                `<button title="Mark this completed" id="resolve-${question.qId}" class="resolve-btn">&#10003;</button>` : '';
+        html += `</div>` +
+            `<div>Agent:  <span>${question.agent} (${submitteName}) </span> </div>` +
+            `<div>Requester: <span>${question.requester}</span></div>` +
+            `<div>Account ID: <span>${question.accountId}</span></div>` +
+            `<div>Address ID: <span>${question.addressId}</span></div>` +
+            `<div>Status: <span>${question.questionStatus}</span></div>` +
+            `<div>Assigned to: <span>${question.assignedTo} (${asgineeName})</span></div>` +
+            `<div class="question-text">Question: ${question.questionText}</div>` ;
+            if (question.questionStatus !== "Resolved"){
+                html += `<div class="question-resolution">Resolution: <br><textarea class='resolution-info' id="resolution-${question.qId}"></textarea></div>` ;
+            } else {
+                html += `<div class="question-resolution">Resolution: ${question.resolution}</div>` ;
+            }
+            
+            html+=`</div>`;
+            return html;
+        
+    }
+
+
+    function resolveQuestionHandler(event){
+        const targetId = event.target.id;
+        let questionInfo = undefined;
+        const [action, qId] = targetId.split("-");
+        console.log(action, qId);
+        let ok = confirm(`Confirm you want to mark question with id ${qId} resolved.`);
+        if (!ok) {
+            document.querySelector('#resolution-' + qId).focus();
+            return;
+        }
+        let resolutionText = document
+            .querySelector('#resolution-' + qId).value;
+        if (resolutionText.length == 0) {
+            return;
+        }
+        questionInfo = {
+            qId: qId,
+            resolution: resolutionText,
+            resolvedOn: new Date().toISOString()
+        };
+        google.script.run
+            .withSuccessHandler(updateInfo)
+            .resolveQuestion(questionInfo);
+    }
+    
+    function showQuestion(reply) {
+        console.log(reply);
+    }
+
+    function showError(reply) {
+        console.log(reply);
+    }
+
+
+    function startRecevingUpdates(){
+        console.log("restarting updates");
+        intervalUpdaterId = setInterval(updateInfo, 10000);
+
+    }
+
+    function stopRecevingUpdates(){
+        console.log("stopping updates");
+        clearInterval(intervalUpdaterId)
+    }
+
+</script>
