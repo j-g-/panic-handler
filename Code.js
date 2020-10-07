@@ -90,6 +90,7 @@ function initializeSpreadSheet() {
       JSON.stringify(getQuestionColumnIndexes()));
   }
 }
+
 function getCurrentAgentRol(){
   const email = getCurrentUserEmail();
   const particpants = getStoredParticipants();
@@ -200,6 +201,11 @@ function getTodaySheet_(){
   return dataSpreadsheet.getSheetByName("Today Questions");
 }
 
+function getQuestionsArchiveSheet_(){
+  let sp = PropertiesService.getScriptProperties();
+  const dataSpreadsheet = SpreadsheetApp.openById(sp.getProperty("data-spreadsheet-id"));
+  return dataSpreadsheet.getSheetByName("Questions Archive");
+}
 
 function getAgentsSheet_(){
   let sp = PropertiesService.getScriptProperties();
@@ -210,8 +216,13 @@ function getAgentsSheet_(){
 function getQuestionRange_(qId){
   const todaySheet = getTodaySheet_();
   let rowsEnd =  todaySheet.getLastRow();
+  Logger.log('Last row: ' + rowsEnd);
   let idColumn = todaySheet.getRange(1, 1, rowsEnd).getValues();
-  let rowIndex = idColumn.find( row =>  row[0] == qId);
+  Logger.log('id column:');
+  Logger.log(idColumn);
+  let rowIndex = idColumn.findIndex( (row) =>  Number(row[0]) === Number(qId));
+  Logger.log('row Index');
+  Logger.log(rowIndex);
   if(rowIndex) {
     let rowNumber = Number(rowIndex) + 1; 
     return  todaySheet.getRange(rowNumber, 1, 1, 12);;
@@ -241,15 +252,18 @@ function assignQuestion(assignToValues){
   let lock = LockService.getScriptLock();
   const locked = lock.tryLock(5000);
   if (locked) {
+    Logger.log("Got Lock")
     let rowRange = getQuestionRange_(assignToValues.qId);
     let indexes = getStoredQuestionColumnIndexes();
     let values = rowRange.getValues();
     if (values[0][indexes.assignedTo] === 'Unassigned') {
       values[0][indexes.assignedTo] = assignToValues.assignee;
+    } else {
+      Logger.log("Unable to get Lock")
     }
     rowRange.setValues(values);
     lock.releaseLock();
-  }
+  } 
   Logger.log("Assign end qid:"+assignToValues.qId);
 }
 
@@ -258,6 +272,17 @@ function getAllTodayQuestions() {
   let questions = todaySheet.getDataRange().getValues();
   questions.shift();
   return questions;
+}
+
+function archiveTodayQuestions(){
+  const todayQuestions = getAllTodayQuestions();
+  const archiveSheet = getQuestionsArchiveSheet_();
+  const lastArchveRow = archiveSheet.getLastRow();
+  //archiveSheet.insertRowsAfter(lastArchveRow, todayQuestions.length);
+  let emptyRange = archiveSheet.getRange(lastArchveRow + 1, 1, todayQuestions.length, 12);
+  const todaySheet = getTodaySheet_();
+  emptyRange.setValues(todayQuestions);
+  todaySheet.deleteRows(2, todayQuestions.length);
 }
 
 function getQuestionsByAgentId(agentId){
