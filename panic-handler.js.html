@@ -115,8 +115,18 @@
             resolvedOn: new Date().toISOString()
         };
         google.script.run
-            .withSuccessHandler(updateInfo)
+            .withSuccessHandler(() => {
+                localStorage.removeItem('unsubRes-'+ qId);
+                updateInfo();
+            })
             .resolveQuestion(questionInfo);
+    }
+
+    function storeUnsubmittedResolutionHandler(event){
+        const ta  = event.target;
+        const qId = Number(ta.id.split('-')[1]);
+        localStorage.setItem('unsubRes-' + qId, ta.value);
+
     }
     
     function showQuestion(reply) {

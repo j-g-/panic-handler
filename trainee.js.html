@@ -100,9 +100,13 @@
             document.querySelector('#unresolved-questions')
                 .querySelectorAll('textarea'));
         
-        textareas.forEach(t => {
-            t.addEventListener('focus', stopRecevingUpdates)
-            t.addEventListener('blur', startRecevingUpdates)
+         textareas.forEach(t => {
+            t.addEventListener('keyup', storeUnsubmittedResolutionHandler);
+            t.addEventListener('focus', stopRecevingUpdates);
+            t.addEventListener('blur', startRecevingUpdates);
+            let qId = t.id.split('-')[1];
+            unsubmittedInfo = localStorage.getItem('unsubRes-' + qId);
+            t.value = (unsubmittedInfo) ? unsubmittedInfo: '';
         });
 
         let resolveButtons = Array.from(document.querySelectorAll('.resolve-btn'));

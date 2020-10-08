@@ -41,8 +41,12 @@
 
         let textareas = Array.from(document.querySelectorAll('textarea.resolution-info'));
         textareas.forEach(t => {
-            t.addEventListener('focus', stopRecevingUpdates)
-            t.addEventListener('blur', startRecevingUpdates)
+            t.addEventListener('keyup', storeUnsubmittedResolutionHandler);
+            t.addEventListener('focus', stopRecevingUpdates);
+            t.addEventListener('blur', startRecevingUpdates);
+            let qId = t.id.split('-')[1];
+            unsubmittedInfo = localStorage.getItem('unsubRes-' + qId);
+            t.value = (unsubmittedInfo) ? unsubmittedInfo: '';
         });
 
         let resolveButtons = Array.from(document.querySelectorAll('.resolve-btn'));

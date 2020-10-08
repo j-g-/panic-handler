@@ -252,16 +252,12 @@ function assignQuestion(assignToValues){
   let lock = LockService.getScriptLock();
   const locked = lock.tryLock(5000);
   if (locked) {
-    Logger.log("Got Lock")
     let rowRange = getQuestionRange_(assignToValues.qId);
     let indexes = getStoredQuestionColumnIndexes();
     let values = rowRange.getValues();
     if (values[0][indexes.assignedTo] === 'Unassigned') {
       values[0][indexes.assignedTo] = assignToValues.assignee;
-    } else {
-      Logger.log("Unable to get Lock")
-    }
-    rowRange.setValues(values);
+    }     rowRange.setValues(values);
     lock.releaseLock();
   } 
   Logger.log("Assign end qid:"+assignToValues.qId);
