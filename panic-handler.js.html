@@ -80,12 +80,12 @@
             `<div>Account ID: <span>${question.accountId}</span></div>` +
             `<div>Address ID: <span>${question.addressId}</span></div>` +
             `<div>Status: <span>${question.questionStatus}</span></div>` +
-            `<div>Assigned to: <span>${question.assignedTo} (${asgineeName})</span></div>` +
-            `<div class="question-text">Question: ${question.questionText}</div>` ;
+            `<div>Assigned to: <span>${question.assignedTo} (${asgineeName})</span></div><br>` +
+            `<div class="question-text"><b>Question:</b><br>${question.questionText}</div><br>` ;
             if (question.questionStatus !== "Resolved"){
-                html += `<div class="question-resolution">Resolution: <br><textarea class='resolution-info' id="resolution-${question.qId}"></textarea></div>` ;
+                html += `<div class="question-resolution"><b>Resolution:</b><br><textarea class='resolution-info' id="resolution-${question.qId}"></textarea></div>` ;
             } else {
-                html += `<div class="question-resolution">Resolution: ${question.resolution}</div>` ;
+                html += `<div class="question-resolution"><b>Resolution:</b><br>${question.resolution}<br></div>` ;
             }
             
             html+=`</div>`;
